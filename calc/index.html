@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B6E75">
+<meta name="color-scheme" content="light">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Cas CUV e:</title>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#F6F8F9; --surface:#FFFFFF; --ink:#14202B; --muted:#5A6A77; --line:#D9E1E6;
+  --accent:#0B6E75; --accent-soft:#E1F0F1;
+  --ui:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono","Roboto Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.5;
+  padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:34rem;margin-inline:auto;padding:16px 16px 56px}
+h1{font-size:22px;line-height:1.1;margin:6px 0 4px;font-weight:800}
+.sub{color:var(--muted);font-size:14px;margin:0 0 14px}
+.res{position:sticky;top:0;z-index:5;background:var(--bg);margin-inline:-16px;padding:10px 16px 12px;border-bottom:1px solid var(--line)}
+.out{background:var(--accent);color:#fff;border-radius:14px;padding:14px 16px}
+.out .big{font:700 30px/1.1 var(--mono);font-variant-numeric:tabular-nums}
+.out .row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:6px;font-size:15px}
+.out b{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 14px 4px;margin-top:12px}
+.card h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;margin:0 0 12px;min-width:0}
+label span{display:block;font-size:13.5px;color:var(--muted);margin-bottom:4px}
+input{width:100%;font:600 18px/1.2 var(--mono);color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:11px 11px}
+input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.note{font-size:13px;color:var(--muted);margin:2px 0 12px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{padding:8px 4px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left} th{font-size:12px;color:var(--muted);font-weight:700}
+.btn{font:700 14px/1 var(--ui);padding:12px 14px;border-radius:10px;border:1.5px solid var(--accent);background:var(--surface);color:var(--accent);cursor:pointer;margin:2px 0 14px}
+.warn{background:#FBEBD0;color:#8A5A00;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
+footer{margin-top:18px;font-size:12.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Cas CUV e:</h1>
+  <p class="sub">Berapa menit dan jam berapa colok, supaya baterai tidak menunggu penuh di colokan.</p>
+
+  <div class="res">
+    <div class="out" aria-live="polite">
+      <div class="big" id="oMenit">-</div>
+      <div class="row"><span>Colok jam <b id="oColok">-</b></span><span>Tambah <b id="oKwh">-</b></span></div>
+      <div class="row"><span>Cabut saat meter <b id="oMeter">-</b></span></div>
+    </div>
+    <div class="warn" id="warn" hidden></div>
+  </div>
+
+  <section class="card">
+    <h2>Kondisi sekarang</h2>
+    <div class="g">
+      <label><span>Baterai terpakai (%)</span><input id="used" type="number" inputmode="decimal" min="0" max="100" step="1"></label>
+      <label><span>Target isi (%)</span><input id="tgt" type="number" inputmode="decimal" min="1" max="100" step="1"></label>
+      <label><span>Berangkat jam</span><input id="dep" type="time"></label>
+      <label><span>Cadangan (menit)</span><input id="mar" type="number" inputmode="decimal" min="0" step="5"></label>
+    </div>
+    <label><span>Angka meter sekarang (kWh)</span><input id="met" type="number" inputmode="decimal" min="0" step="0.01"></label>
+  </section>
+
+  <section class="card">
+    <h2>Parameter charger</h2>
+    <div class="g">
+      <label><span>Kapasitas (Ah)</span><input id="ah" type="number" inputmode="decimal" min="1" step="0.1"></label>
+      <label><span>Arus charger (A)</span><input id="amp" type="number" inputmode="decimal" min="0.1" step="0.1"></label>
+      <label><span>Efisiensi</span><input id="eff" type="number" inputmode="decimal" min="0.3" max="1" step="0.01"></label>
+      <label><span>kWh per 1%</span><input id="fac" type="number" inputmode="decimal" min="0.001" step="0.0005"></label>
+    </div>
+    <p class="note">Waktu = (persen tambah × Ah) ÷ (arus × efisiensi). Paling akurat sampai sekitar 80%; menuju 100% waktunya cenderung lebih lama karena arus turun di akhir. Cocokkan dengan meter kWh.</p>
+    <button class="btn" id="reset" type="button">Kembalikan ke nilai awal</button>
+  </section>
+
+  <section class="card">
+    <h2>Tabel cepat</h2>
+    <div style="overflow-x:auto"><table id="quick"></table></div>
+    <p class="note" style="margin-top:10px">Lama cas dan kWh yang ditambah menurut persen terpakai, untuk target di atas.</p>
+  </section>
+
+  <footer>Perkiraan berdasarkan rumus dan data pemakaian pribadi, bukan spesifikasi pabrikan. Pastikan sesuai manual dan garansi Honda. Jangan memodifikasi charger.</footer>
+</div>
+
+<script>
+(function(){
+  var DEF = {used:46, tgt:80, dep:"07:00", mar:15, met:0, ah:29.4, amp:6.8, eff:0.75, fac:0.0275};
+  var KEY = "cuve-cas-v1", ids = Object.keys(DEF), s = {};
+  function el(i){ return document.getElementById(i); }
+  function fmt(v, d){ return v.toLocaleString("id-ID", {minimumFractionDigits: d, maximumFractionDigits: d}); }
+  function load(){ var o = null; try { o = JSON.parse(localStorage.getItem(KEY) || "null"); } catch(e){} ids.forEach(function(i){ s[i] = (o && o[i] != null) ? o[i] : DEF[i]; el(i).value = s[i]; }); }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e){} }
+  function n(i){ return parseFloat(s[i]); }
+  function plan(used, tgt){
+    var add = tgt - (100 - used), ah = n("ah"), amp = n("amp"), eff = n("eff"), fac = n("fac");
+    if (!(add > 0) || !(amp * eff > 0)) return null;
+    var min = (add / 100 * ah) / (amp * eff) * 60, kwh = add * fac;
+    return {add: add, min: min, kwh: kwh, watt: kwh / (min / 60) * 1000};
+  }
+  function render(){
+    var w = el("warn"), used = n("used"), tgt = n("tgt");
+    var p = [used, tgt, n("ah"), n("amp"), n("eff"), n("fac")].every(isFinite) ? plan(used, tgt) : null;
+    w.hidden = true;
+    if (!p) {
+      el("oMenit").textContent = "0 menit"; el("oColok").textContent = "-"; el("oKwh").textContent = "0 kWh"; el("oMeter").textContent = "-";
+      if ([used, tgt].every(isFinite) && tgt <= 100 - used) { w.hidden = false; w.textContent = "Baterai sudah di atas target. Tidak perlu mengecas."; }
+    } else {
+      var m = Math.round(p.min), h = Math.floor(m / 60), r = m % 60;
+      el("oMenit").textContent = m + " menit";
+      el("oKwh").textContent = "+" + fmt(p.kwh, 2) + " kWh";
+      el("oMeter").textContent = fmt(n("met") + p.kwh, 2) + " kWh";
+      var dep = s.dep, mar = parseFloat(s.mar) || 0, col = "-";
+      if (/^\d\d:\d\d$/.test(dep)) {
+        var d = dep.split(":"), t = parseInt(d[0], 10) * 60 + parseInt(d[1], 10) - m - mar, prev = false;
+        if (t < 0) { t += 1440; prev = true; }
+        col = String(Math.floor(t / 60)).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0") + (prev ? " (malam)" : "");
+      }
+      el("oColok").textContent = col;
+      if (tgt > 90) { w.hidden = false; w.textContent = "Target di atas 90%: menuju penuh baterai lama berada di kondisi penuh. Perkiraan waktunya juga kurang akurat di bagian akhir."; }
+    }
+    var tg = isFinite(tgt) ? tgt : 80, h2 = "<tr><th>Terpakai</th><th>Lama cas</th><th>Tambah</th></tr>";
+    [20, 30, 40, 50, 60, 70].forEach(function(u){
+      var q = plan(u, tg);
+      h2 += "<tr><td>" + u + "%</td><td>" + (q ? Math.round(q.min) + " mnt" : "-") + "</td><td>" + (q ? fmt(q.kwh, 2) + " kWh" : "-") + "</td></tr>";
+    });
+    el("quick").innerHTML = h2;
+  }
+  ids.forEach(function(i){ el(i).addEventListener("input", function(){ s[i] = el(i).value; save(); render(); }); });
+  el("reset").addEventListener("click", function(){ ids.forEach(function(i){ s[i] = DEF[i]; el(i).value = DEF[i]; }); save(); render(); });
+  load(); render();
+  if ("serviceWorker" in navigator) { window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); }); }
+})();
+</script>
+</body>
+</html>
