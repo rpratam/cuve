@@ -65,7 +65,7 @@ footer{margin-top:18px;font-size:12.5px;color:var(--muted)}
   <section class="card">
     <h2>Kondisi sekarang</h2>
     <div class="g">
-      <label><span>Baterai terpakai (%)</span><input id="used" type="number" inputmode="decimal" min="0" max="100" step="1"></label>
+      <label><span>Sisa baterai saat ini (%)</span><input id="cur" type="number" inputmode="decimal" min="0" max="100" step="1"></label>
       <label><span>Target isi (%)</span><input id="tgt" type="number" inputmode="decimal" min="1" max="100" step="1"></label>
       <label><span>Berangkat jam</span><input id="dep" type="time"></label>
       <label><span>Cadangan (menit)</span><input id="mar" type="number" inputmode="decimal" min="0" step="5"></label>
@@ -88,7 +88,7 @@ footer{margin-top:18px;font-size:12.5px;color:var(--muted)}
   <section class="card">
     <h2>Tabel cepat</h2>
     <div style="overflow-x:auto"><table id="quick"></table></div>
-    <p class="note" style="margin-top:10px">Lama <i>charge</i> dan kWh yang ditambah menurut persen terpakai, untuk target di atas.</p>
+    <p class="note" style="margin-top:10px">Lama <i>charge</i> dan kWh yang ditambah menurut sisa baterai, untuk target di atas.</p>
   </section>
 
   <footer>Perkiraan berdasarkan rumus dan data pemakaian pribadi, bukan spesifikasi pabrikan. Pastikan sesuai manual dan garansi Honda. Jangan memodifikasi charger.
@@ -98,26 +98,26 @@ footer{margin-top:18px;font-size:12.5px;color:var(--muted)}
 
 <script>
 (function(){
-  var DEF = {used:46, tgt:80, dep:"07:00", mar:15, met:0, ah:29.4, amp:6.8, eff:0.75, fac:0.0275};
+  var DEF = {cur:54, tgt:80, dep:"07:00", mar:15, met:0, ah:29.4, amp:6.8, eff:0.75, fac:0.0275};
   var KEY = "cuve-cas-v1", ids = Object.keys(DEF), s = {};
   function el(i){ return document.getElementById(i); }
   function fmt(v, d){ return v.toLocaleString("id-ID", {minimumFractionDigits: d, maximumFractionDigits: d}); }
   function load(){ var o = null; try { o = JSON.parse(localStorage.getItem(KEY) || "null"); } catch(e){} ids.forEach(function(i){ s[i] = (o && o[i] != null) ? o[i] : DEF[i]; el(i).value = s[i]; }); }
   function save(){ try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e){} }
   function n(i){ return parseFloat(s[i]); }
-  function plan(used, tgt){
-    var add = tgt - (100 - used), ah = n("ah"), amp = n("amp"), eff = n("eff"), fac = n("fac");
+  function plan(cur, tgt){
+    var add = tgt - cur, ah = n("ah"), amp = n("amp"), eff = n("eff"), fac = n("fac");
     if (!(add > 0) || !(amp * eff > 0)) return null;
     var min = (add / 100 * ah) / (amp * eff) * 60, kwh = add * fac;
     return {add: add, min: min, kwh: kwh, watt: kwh / (min / 60) * 1000};
   }
   function render(){
-    var w = el("warn"), used = n("used"), tgt = n("tgt");
-    var p = [used, tgt, n("ah"), n("amp"), n("eff"), n("fac")].every(isFinite) ? plan(used, tgt) : null;
+    var w = el("warn"), cur = n("cur"), tgt = n("tgt");
+    var p = [cur, tgt, n("ah"), n("amp"), n("eff"), n("fac")].every(isFinite) ? plan(cur, tgt) : null;
     w.hidden = true;
     if (!p) {
       el("oMenit").textContent = "0 menit"; el("oColok").textContent = "-"; el("oKwh").textContent = "0 kWh"; el("oMeter").textContent = "-";
-      if ([used, tgt].every(isFinite) && tgt <= 100 - used) { w.hidden = false; w.textContent = "Baterai sudah di atas target. Tidak perlu mengecas."; }
+      if ([cur, tgt].every(isFinite) && tgt <= cur) { w.hidden = false; w.textContent = "Baterai sudah di atas target. Tidak perlu mengecas."; }
     } else {
       var m = Math.round(p.min), h = Math.floor(m / 60), r = m % 60;
       el("oMenit").textContent = m + " menit";
@@ -132,8 +132,8 @@ footer{margin-top:18px;font-size:12.5px;color:var(--muted)}
       el("oColok").textContent = col;
       if (tgt > 90) { w.hidden = false; w.textContent = "Target di atas 90%: menuju penuh baterai lama berada di kondisi penuh. Perkiraan waktunya juga kurang akurat di bagian akhir."; }
     }
-    var tg = isFinite(tgt) ? tgt : 80, h2 = "<tr><th>Terpakai</th><th>Lama <i>charge</i></th><th>Tambah</th></tr>";
-    [20, 30, 40, 50, 60, 70].forEach(function(u){
+    var tg = isFinite(tgt) ? tgt : 80, h2 = "<tr><th>Sisa</th><th>Lama <i>charge</i></th><th>Tambah</th></tr>";
+    [70, 60, 50, 40, 30, 20].forEach(function(u){
       var q = plan(u, tg);
       h2 += "<tr><td>" + u + "%</td><td>" + (q ? Math.round(q.min) + " mnt" : "-") + "</td><td>" + (q ? fmt(q.kwh, 2) + " kWh" : "-") + "</td></tr>";
     });
