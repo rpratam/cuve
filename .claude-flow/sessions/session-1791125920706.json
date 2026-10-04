@@ -1,0 +1,14 @@
+{
+  "id": "session-1791125920706",
+  "startedAt": "2026-10-04T14:58:40.706Z",
+  "cwd": "/Users/randi/Documents/GitHub/cuve",
+  "context": {},
+  "metrics": {
+    "edits": 0,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "endedAt": "2026-10-04T14:59:08.797Z",
+  "duration": 28094
+}

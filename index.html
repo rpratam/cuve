@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>Cas CUV e:</title>
+<title>Perhitungan waktu charge baterai Honda CUV e</title>
 <style>
 :root{
   color-scheme:light;
@@ -43,11 +43,14 @@ th:first-child,td:first-child{text-align:left} th{font-size:12px;color:var(--mut
 .btn{font:700 14px/1 var(--ui);padding:12px 14px;border-radius:10px;border:1.5px solid var(--accent);background:var(--surface);color:var(--accent);cursor:pointer;margin:2px 0 14px}
 .warn{background:#FBEBD0;color:#8A5A00;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
 footer{margin-top:18px;font-size:12.5px;color:var(--muted)}
+.hero{display:block;width:100%;height:auto;border-radius:14px;margin:0 0 8px}
+.copy{margin-top:12px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Cas CUV e:</h1>
+  <img class="hero" src="images/cuve.jpg" alt="Honda CUV e: putih, tampak samping depan" width="700" height="459">
+  <h1>Perhitungan waktu charge baterai Honda CUV e</h1>
   <p class="sub">Berapa menit dan jam berapa colok, supaya baterai tidak menunggu penuh di colokan.</p>
 
   <div class="res">
@@ -85,10 +88,12 @@ footer{margin-top:18px;font-size:12.5px;color:var(--muted)}
   <section class="card">
     <h2>Tabel cepat</h2>
     <div style="overflow-x:auto"><table id="quick"></table></div>
-    <p class="note" style="margin-top:10px">Lama cas dan kWh yang ditambah menurut persen terpakai, untuk target di atas.</p>
+    <p class="note" style="margin-top:10px">Lama <i>charge</i> dan kWh yang ditambah menurut persen terpakai, untuk target di atas.</p>
   </section>
 
-  <footer>Perkiraan berdasarkan rumus dan data pemakaian pribadi, bukan spesifikasi pabrikan. Pastikan sesuai manual dan garansi Honda. Jangan memodifikasi charger.</footer>
+  <footer>Perkiraan berdasarkan rumus dan data pemakaian pribadi, bukan spesifikasi pabrikan. Pastikan sesuai manual dan garansi Honda. Jangan memodifikasi charger.
+    <p class="copy">&copy; Rahadian Pratama (<a href="mailto:rahadian@apps.ipb.ac.id">rahadian@apps.ipb.ac.id</a>). Penggunaan menjadi tanggung jawab masing-masing pengguna. Rahadian tidak bertanggung jawab atas kejadian apa pun yang timbul akibat mengikuti panduan kalkulator ini.</p>
+  </footer>
 </div>
 
 <script>
@@ -127,7 +132,7 @@ footer{margin-top:18px;font-size:12.5px;color:var(--muted)}
       el("oColok").textContent = col;
       if (tgt > 90) { w.hidden = false; w.textContent = "Target di atas 90%: menuju penuh baterai lama berada di kondisi penuh. Perkiraan waktunya juga kurang akurat di bagian akhir."; }
     }
-    var tg = isFinite(tgt) ? tgt : 80, h2 = "<tr><th>Terpakai</th><th>Lama cas</th><th>Tambah</th></tr>";
+    var tg = isFinite(tgt) ? tgt : 80, h2 = "<tr><th>Terpakai</th><th>Lama <i>charge</i></th><th>Tambah</th></tr>";
     [20, 30, 40, 50, 60, 70].forEach(function(u){
       var q = plan(u, tg);
       h2 += "<tr><td>" + u + "%</td><td>" + (q ? Math.round(q.min) + " mnt" : "-") + "</td><td>" + (q ? fmt(q.kwh, 2) + " kWh" : "-") + "</td></tr>";

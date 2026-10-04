@@ -1,7 +1,7 @@
 {
-  "name": "Cas CUV e:",
-  "short_name": "Cas CUVe",
-  "description": "Hitung lama cas, jam colok, dan kWh untuk baterai motor Honda CUV e:.",
+  "name": "Perhitungan waktu charge baterai Honda CUV e",
+  "short_name": "Charge CUV e",
+  "description": "Hitung lama charge, jam colok, dan kWh untuk baterai motor Honda CUV e:.",
   "lang": "id",
   "start_url": "./index.html",
   "scope": "./",
