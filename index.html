@@ -51,13 +51,13 @@ footer{margin-top:18px;font-size:12.5px;color:var(--muted)}
 <div class="wrap">
   <img class="hero" src="images/cuve.jpg" alt="Honda CUV e: putih, tampak samping depan" width="700" height="459">
   <h1>Perhitungan waktu charge baterai Honda CUV e</h1>
-  <p class="sub">Berapa menit dan jam berapa colok, supaya baterai tidak menunggu penuh di colokan.</p>
+  <p class="sub">Berapa menit dan jam berapa mulai <i>charge</i>, agar baterai tidak menunggu penuh di <i>charger</i>-nya.</p>
 
   <div class="res">
     <div class="out" aria-live="polite">
       <div class="big" id="oMenit">-</div>
       <div class="row"><span>Colok jam <b id="oColok">-</b></span><span>Tambah <b id="oKwh">-</b></span></div>
-      <div class="row"><span>Cabut saat meter <b id="oMeter">-</b></span></div>
+      <div class="row"><span>Cabut jam <b id="oCabut">-</b></span></div>
     </div>
     <div class="warn" id="warn" hidden></div>
   </div>
@@ -70,7 +70,6 @@ footer{margin-top:18px;font-size:12.5px;color:var(--muted)}
       <label><span>Berangkat jam</span><input id="dep" type="time"></label>
       <label><span>Cadangan (menit)</span><input id="mar" type="number" inputmode="decimal" min="0" step="5"></label>
     </div>
-    <label><span>Angka meter sekarang (kWh)</span><input id="met" type="number" inputmode="decimal" min="0" step="0.01"></label>
   </section>
 
   <section class="card">
@@ -98,7 +97,7 @@ footer{margin-top:18px;font-size:12.5px;color:var(--muted)}
 
 <script>
 (function(){
-  var DEF = {cur:54, tgt:80, dep:"07:00", mar:15, met:0, ah:29.4, amp:6.8, eff:0.75, fac:0.0275};
+  var DEF = {cur:54, tgt:80, dep:"07:00", mar:15, ah:29.4, amp:6.8, eff:0.75, fac:0.0275};
   var KEY = "cuve-cas-v1", ids = Object.keys(DEF), s = {};
   function el(i){ return document.getElementById(i); }
   function fmt(v, d){ return v.toLocaleString("id-ID", {minimumFractionDigits: d, maximumFractionDigits: d}); }
@@ -116,20 +115,21 @@ footer{margin-top:18px;font-size:12.5px;color:var(--muted)}
     var p = [cur, tgt, n("ah"), n("amp"), n("eff"), n("fac")].every(isFinite) ? plan(cur, tgt) : null;
     w.hidden = true;
     if (!p) {
-      el("oMenit").textContent = "0 menit"; el("oColok").textContent = "-"; el("oKwh").textContent = "0 kWh"; el("oMeter").textContent = "-";
+      el("oMenit").textContent = "0 menit"; el("oColok").textContent = "-"; el("oKwh").textContent = "0 kWh"; el("oCabut").textContent = "-";
       if ([cur, tgt].every(isFinite) && tgt <= cur) { w.hidden = false; w.textContent = "Baterai sudah di atas target. Tidak perlu mengecas."; }
     } else {
       var m = Math.round(p.min), h = Math.floor(m / 60), r = m % 60;
       el("oMenit").textContent = m + " menit";
       el("oKwh").textContent = "+" + fmt(p.kwh, 2) + " kWh";
-      el("oMeter").textContent = fmt(n("met") + p.kwh, 2) + " kWh";
-      var dep = s.dep, mar = parseFloat(s.mar) || 0, col = "-";
+      var dep = s.dep, mar = parseFloat(s.mar) || 0, col = "-", cab = "-";
+      function hm(t){ return String(Math.floor(t / 60)).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0"); }
       if (/^\d\d:\d\d$/.test(dep)) {
         var d = dep.split(":"), t = parseInt(d[0], 10) * 60 + parseInt(d[1], 10) - m - mar, prev = false;
         if (t < 0) { t += 1440; prev = true; }
-        col = String(Math.floor(t / 60)).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0") + (prev ? " (malam)" : "");
+        col = hm(t) + (prev ? " (malam)" : "");
+        cab = hm((t + m) % 1440);
       }
-      el("oColok").textContent = col;
+      el("oColok").textContent = col; el("oCabut").textContent = cab;
       if (tgt > 90) { w.hidden = false; w.textContent = "Target di atas 90%: menuju penuh baterai lama berada di kondisi penuh. Perkiraan waktunya juga kurang akurat di bagian akhir."; }
     }
     var tg = isFinite(tgt) ? tgt : 80, h2 = "<tr><th>Sisa</th><th>Lama <i>charge</i></th><th>Tambah</th></tr>";
